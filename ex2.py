@@ -36,11 +36,12 @@ def insert_user(name,password):
                 VALUES ('" + name + "', '" + password + "', '" + key1 + "', '" + key2 + "', '" + key3 + "', '" + key4 + "')")
 
         conn.commit()
+        return True
 
 
 #fonction de logging
 def logging(name, password):
-        cursor = conn.execute("SELECT USERNAME, PASSWORD  from USERS")
+        cursor = conn.execute("SELECT USERNAME, PASSWORD  from USERS WHERE USERNAME IS '"+name+"'")
         for row in cursor:
                 if password != row[1]:
                         print("your password is wrong.")
@@ -53,7 +54,7 @@ def logging(name, password):
 
 #return clef
 def return_clef(name, password):
-        cursor = conn.execute("SELECT USERNAME, PASSWORD  from USERS WHERE USERNAME IS " + name)
+        cursor = conn.execute("SELECT USERNAME, PASSWORD, SPUBLICKEY, SPRIVATEKEY, EPUBLICKEY, EPRIVATEKEY  from USERS WHERE USERNAME IS '" + name +"'")
         for row in cursor:
                 if password != row[1]:
                         print("your password is wrong.")
@@ -66,7 +67,7 @@ def return_clef(name, password):
 
 #verify bdd is right
 def verify():
-        cursor = conn.execute("SELECT USERNAME, PASSWORD  from USERS")
+        cursor = conn.execute("SELECT USERNAME, PASSWORD, SPUBLICKEY, SPRIVATEKEY, EPUBLICKEY, EPRIVATEKEY from USERS")
         s = set()
         for row in cursor:
                 maj = 0
@@ -101,13 +102,13 @@ def verify():
                         if c > 'A' and c < 'Z':
                                 maj = 1
                         # at least 1 special char
-                        if c > 33 and c < 47:
+                        if c > '!' and c < '/':
                                 spe = 1
                         # at least 1 number
-                        if c > '1' and c < '9':
+                        if c >= '1' and c <= '9':
                                 num = 1
                 if (not maj) or (not spe) or (not num):
-                        print("The format of the password does not meet the rules.")
+                        print("The format of the password does not meet the rules:",row[0],maj,spe,num)
                         return False
                 
                 for i in range(2,6):
@@ -117,10 +118,15 @@ def verify():
                  
         return True
 
-
+'''
 def main():
         insert_user("Chen","X1mk.fioe")
+        insert_user("Zheng","Qi,e0109")
+        #k1,k2,k3,k4 = return_clef("Chen","X1mk.fioe")
+        #print(k1)
+        verify()
         conn.close()
 
 if __name__ == "__main__":
         main()
+'''
