@@ -1,12 +1,24 @@
 import ex2
 import sqlite3
 import unittest
+import random
+import string
 
 class Test(unittest.TestCase):
 
     def test_insert_user(self):
         self.assertEqual(ex2.insert_user("Chen","X1mk.fioe"),True)
         self.assertEqual(ex2.insert_user("Zheng","Qi,e0109"),True)
+        # name < 3 chars
+        self.assertEqual(ex2.insert_user("Zh","Qi,e0109"),False)
+        # password < 8 chars
+        self.assertEqual(ex2.insert_user("Zheng","Qi,e01"),False)
+        # password does not have number
+        self.assertEqual(ex2.insert_user("Zheng","Qi,exxxx"),False)
+        # password does not have uppercase letter
+        self.assertEqual(ex2.insert_user("Zheng","qi,e0109"),False)
+        # password does not have special char
+        self.assertEqual(ex2.insert_user("Zheng","qixe0109"),False)
 
 
 
@@ -43,30 +55,50 @@ class Test(unittest.TestCase):
         self.assertEqual(ex2.verify(),True)
 
         conn = sqlite3.connect('ex2.db')
+        cur = conn.cursor()
+
+        #Randomly generate keys
+        str_list = [random.choice(string.digits + string.ascii_letters) for i in range(128)]
+        key1 = ''.join(str_list)
+        str_list = [random.choice(string.digits + string.ascii_letters) for i in range(128)]
+        key2 = ''.join(str_list)
+        str_list = [random.choice(string.digits + string.ascii_letters) for i in range(128)]
+        key3 = ''.join(str_list)
+        str_list = [random.choice(string.digits + string.ascii_letters) for i in range(128)]
+        key4 = ''.join(str_list)
+    
 
         # username shorter than 3
-        ex2.insert_user("ff","ji3O8h.T") 
+        cur.execute("INSERT INTO USERS (USERNAME, PASSWORD, SPUBLICKEY, SPRIVATEKEY, EPUBLICKEY, EPRIVATEKEY) \
+                VALUES ('Zh', 'Qi,e0109', '" + key1 + "', '" + key2 + "', '" + key3 + "', '" + key4 + "')") 
+        conn.commit()
         self.assertEqual(ex2.verify(),False)
-        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'ff'")
+        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'Zh'")
         conn.commit()
 
         # username contains a special char
-        ex2.insert_user("ff:f","ji3O8h.T") 
+        cur.execute("INSERT INTO USERS (USERNAME, PASSWORD, SPUBLICKEY, SPRIVATEKEY, EPUBLICKEY, EPRIVATEKEY) \
+                VALUES ('Zhen,', 'Qi,e0109', '" + key1 + "', '" + key2 + "', '" + key3 + "', '" + key4 + "')") 
+        conn.commit()
         self.assertEqual(ex2.verify(),False)
-        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'ff:f'")
+        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'Zhen,'")
         conn.commit()
 
 
         #password does not contain a uppercase letter
-        ex2.insert_user("kkk","ji3e8h.t") 
+        cur.execute("INSERT INTO USERS (USERNAME, PASSWORD, SPUBLICKEY, SPRIVATEKEY, EPUBLICKEY, EPRIVATEKEY) \
+                VALUES ('zheng', 'qi,e0109', '" + key1 + "', '" + key2 + "', '" + key3 + "', '" + key4 + "')") 
+        conn.commit()
         self.assertEqual(ex2.verify(),False)
-        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'kkk'")
+        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'zheng'")
         conn.commit()
 
         #password does not contain number
-        ex2.insert_user("kkk","jiReBh.t") 
+        cur.execute("INSERT INTO USERS (USERNAME, PASSWORD, SPUBLICKEY, SPRIVATEKEY, EPUBLICKEY, EPRIVATEKEY) \
+                VALUES ('zheng', 'Qi,exxxx', '" + key1 + "', '" + key2 + "', '" + key3 + "', '" + key4 + "')") 
+        conn.commit()
         self.assertEqual(ex2.verify(),False)
-        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'kkk'")
+        conn.execute("DELETE FROM USERS WHERE USERNAME IS 'zheng'")
         conn.commit()
 
         conn.close()

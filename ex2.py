@@ -22,7 +22,39 @@ conn.commit()
 
 #ajouter un utilisateur a la bdd
 def insert_user(name,password):
-        
+        maj = 0
+        spe = 0
+        num = 0
+        if len(name) < 3:
+                        print("INSERT ",name,": The length of username is at least 3 chars.")
+                        return False
+                
+        #username only contain letters and numbers
+        for c in name:
+                if c < '0' or (c>'9' and c<'A') or (c>'Z' and c<'a') or c > 'z':
+                        print("INSERT ",name,": The username should only contain letters and numbers.")
+                        return False
+
+        # password has at least 8 chars
+        if len(password) < 8:
+                print("INSERT : The length of password is shorter than 8.")
+                return False
+
+        for c in password:
+                # at least 1 uppercase leeter
+                if c > 'A' and c < 'Z':
+                        maj = 1
+                # at least 1 special char
+                if c > '!' and c < '/':
+                        spe = 1
+                # at least 1 number
+                if c >= '1' and c <= '9':
+                        num = 1
+        if (not maj) or (not spe) or (not num):
+                print("INSERT : The format of the password does not meet the rules:",maj,spe,num)
+                return False
+
+
         str_list = [random.choice(string.digits + string.ascii_letters) for i in range(128)]
         key1 = ''.join(str_list)
         str_list = [random.choice(string.digits + string.ascii_letters) for i in range(128)]
